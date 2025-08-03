@@ -9,3 +9,5 @@
 2025-08-02 22:01:33,035 - routes.recommend - INFO - Profil mis à jour pour user_id: {{user_id}}
 2025-08-03 00:21:20,526 - config - ERROR - Erreur lors de la récupération des statistiques: 'DevelopmentConfig' object has no attribute 'BusinessConstants'
 2025-08-03 00:24:07,608 - routes.recommend - INFO - Profil créé pour user_id: user_minimal_002
+2025-08-03 00:49:48,531 - routes.recommend - INFO - Interaction enregistrée: vue pour user {{user_id}}
+2025-08-03 01:14:21,735 - config - ERROR - Erreur lors de la récupération des statistiques: 'DevelopmentConfig' object has no attribute 'BusinessConstants'
