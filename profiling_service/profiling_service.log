@@ -35,3 +35,14 @@
 2025-08-04 02:34:59,840 - routes.recommend - INFO - Profil mis à jour pour user_id: abc123
 2025-08-04 02:35:07,446 - routes.recommend - INFO - Profil mis à jour pour user_id: userkcck_minimal_002
 2025-08-04 02:35:25,717 - routes.recommend - INFO - Préférences mises à jour pour user_id: abc123
+2025-08-04 02:43:51,853 - routes.recommend - INFO - Profil créé pour user_id: userkkll_minimal_002
+2025-08-04 02:43:51,853 - routes.recommend - INFO - Profil complet: False
+2025-08-04 02:54:17,428 - routes.recommend - INFO - Profil créé pour user_id: userwiwi_minimal_002
+2025-08-04 02:54:17,429 - routes.recommend - INFO - Profil complet: False
+2025-08-04 02:54:57,774 - routes.recommend - INFO - Préférences mises à jour pour user_id: abc123
+2025-08-04 02:54:57,774 - routes.recommend - INFO - Nouveau statut profil_complete: True
+2025-08-04 02:58:47,271 - routes.recommend - INFO - Interaction enregistrée: vue pour user abc123
+2025-08-04 03:00:10,767 - routes.recommend - INFO - Interaction enregistrée: clic pour user abc123
+2025-08-04 03:00:23,367 - routes.recommend - INFO - Interaction enregistrée: favori pour user abc123
+2025-08-04 03:02:19,914 - routes.recommend - INFO - Interaction enregistrée: candidature pour user abc123
+2025-08-04 03:02:54,332 - routes.recommend - INFO - Interaction enregistrée: vue pour user abc123
