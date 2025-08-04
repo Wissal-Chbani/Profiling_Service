@@ -232,70 +232,7 @@ tail -f profiling_service.log
 | `LOG_LEVEL` | Niveau de log | INFO |
 | `ENABLE_ML_SCORING` | Activer le scoring ML | false |
 
-### Optimisations MongoDB
 
-```javascript
-// Index recommandés
-db.user_profiles.createIndex({ "user_id": 1 }, { unique: true })
-db.appels_offres.createIndex({ "secteur": 1, "ville": 1, "date_limite": 1 })
-db.interactions_users.createIndex({ "user_id": 1, "timestamp": -1 })
-```
 
-## 🚀 Déploiement
 
-### Docker
 
-```dockerfile
-FROM python:3.9-slim
-
-WORKDIR /app
-COPY requirements.txt .
-RUN pip install -r requirements.txt
-
-COPY . .
-EXPOSE 8000
-
-CMD ["python", "app/main.py"]
-```
-
-### Docker Compose
-
-```yaml
-version: '3.8'
-services:
-  api:
-    build: .
-    ports:
-      - "8000:8000"
-    environment:
-      - MONGODB_URL=mongodb://mongo:27017
-    depends_on:
-      - mongo
-  
-  mongo:
-    image: mongo:latest
-    ports:
-      - "27017:27017"
-    volumes:
-      - mongodb_data:/data/db
-
-volumes:
-  mongodb_data:
-```
-
-## 🔮 Roadmap
-
-### Version 1.1
-- [ ] Système de notifications push
-- [ ] Cache Redis pour améliorer les performances
-- [ ] API de gestion des favoris
-
-### Version 1.2
-- [ ] Machine Learning avancé (modèles personnalisés)
-- [ ] Analyse sentiment des interactions
-- [ ] Recommandations collaboratives
-
-### Version 2.0
-- [ ] Intégration intelligence artificielle
-- [ ] Prédiction de succès des candidatures
-- [ ] Tableau de bord analytics avancé
