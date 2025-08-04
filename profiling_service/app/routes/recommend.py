@@ -25,8 +25,10 @@ async def create_or_update_profile(
 ):
     """Créer ou mettre à jour le profil d'un utilisateur"""
     try:
-        # Marquer le profil comme complet
-        profile.profil_complete = True
+        # ✅ CORRECTION : Ne plus forcer profil_complete = True
+        # Le @root_validator dans UserProfile se charge automatiquement de définir profil_complete
+        
+        # Mettre à jour la date de modification
         profile.date_modification = datetime.utcnow()
         
         # Sauvegarder en base
@@ -40,6 +42,7 @@ async def create_or_update_profile(
         )
         
         logger.info(f"Profil {'créé' if result.upserted_id else 'mis à jour'} pour user_id: {profile.user_id}")
+        logger.info(f"Profil complet: {profile.profil_complete}")
         
         return {
             "success": True,
@@ -77,6 +80,47 @@ async def get_profile(
         logger.error(f"Erreur lors de la récupération du profil: {e}")
         raise HTTPException(status_code=500, detail="Erreur lors de la récupération du profil")
 
+@router.put("/profile/{user_id}/refresh-completeness", summary="Recalculer la complétude du profil")
+async def refresh_profile_completeness(
+    user_id: str,
+    db = Depends(get_database)
+):
+    """Recalcule et met à jour la complétude d'un profil existant"""
+    try:
+        collection = db[UserProfile.Config.collection]
+        profile_data = await collection.find_one({"user_id": user_id})
+        
+        if not profile_data:
+            raise HTTPException(status_code=404, detail="Profil utilisateur non trouvé")
+        
+        # Supprimer l'_id MongoDB
+        profile_data.pop('_id', None)
+        
+        # Recréer l'objet UserProfile pour déclencher la validation
+        profile = UserProfile(**profile_data)
+        
+        # Sauvegarder avec la nouvelle valeur de profil_complete
+        await collection.replace_one(
+            {"user_id": user_id},
+            profile.dict()
+        )
+        
+        logger.info(f"Complétude recalculée pour user_id: {user_id} -> {profile.profil_complete}")
+        
+        return {
+            "success": True,
+            "message": "Complétude du profil recalculée",
+            "user_id": user_id,
+            "profile_complete": profile.profil_complete,
+            "updated_at": profile.date_modification
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Erreur lors du recalcul de complétude: {e}")
+        raise HTTPException(status_code=500, detail="Erreur lors du recalcul de complétude")
+
 @router.get("/appels-offres/{user_id}", summary="Obtenir les appels d'offres recommandés")
 async def get_recommended_appels_offres(
     user_id: str,
@@ -101,7 +145,8 @@ async def get_recommended_appels_offres(
             return {
                 "success": False,
                 "message": "Profil incomplet. Veuillez compléter votre profil pour recevoir des recommandations.",
-                "recommendations": []
+                "recommendations": [],
+                "missing_fields": _get_missing_fields(profil)
             }
         
         # Récupérer les appels d'offres actifs
@@ -284,21 +329,34 @@ async def update_preferences(
         if not updates:
             raise HTTPException(status_code=400, detail="Aucune préférence valide fournie")
         
-        # Mettre à jour en base
-        result = await collection.update_one(
-            {"user_id": user_id},
-            {"$set": updates}
-        )
-        
-        if result.matched_count == 0:
+        # Récupérer le profil actuel pour recalculer la complétude
+        profile_data = await collection.find_one({"user_id": user_id})
+        if not profile_data:
             raise HTTPException(status_code=404, detail="Profil utilisateur non trouvé")
         
+        # Supprimer l'_id MongoDB
+        profile_data.pop('_id', None)
+        
+        # Appliquer les mises à jour
+        profile_data.update(updates)
+        
+        # Recréer l'objet UserProfile pour déclencher la validation de complétude
+        profile = UserProfile(**profile_data)
+        
+        # Sauvegarder avec la nouvelle valeur de profil_complete
+        result = await collection.replace_one(
+            {"user_id": user_id},
+            profile.dict()
+        )
+        
         logger.info(f"Préférences mises à jour pour user_id: {user_id}")
+        logger.info(f"Nouveau statut profil_complete: {profile.profil_complete}")
         
         return {
             "success": True,
             "message": "Préférences mises à jour avec succès",
-            "updated_fields": list(updates.keys())
+            "updated_fields": list(updates.keys()),
+            "profile_complete": profile.profil_complete
         }
         
     except HTTPException:
@@ -392,3 +450,30 @@ async def update_user_engagement_score(user_id: str, type_interaction: str, db):
             
     except Exception as e:
         logger.error(f"Erreur lors de la mise à jour du score d'engagement: {e}")
+
+def _get_missing_fields(profil: UserProfile) -> List[str]:
+    """Identifie les champs manquants pour un profil complet"""
+    missing = []
+    
+    if not profil.villes_preferees or len(profil.villes_preferees) == 0:
+        missing.append("villes_preferees")
+    
+    if not profil.secteur_activite or len(profil.secteur_activite) == 0:
+        missing.append("secteur_activite")
+    
+    if not profil.classifications_preferees or len(profil.classifications_preferees) == 0:
+        missing.append("classifications_preferees")
+    
+    if not profil.mots_cles_metier or len(profil.mots_cles_metier) == 0:
+        missing.append("mots_cles_metier")
+    
+    if not profil.budget_min or profil.budget_min <= 0:
+        missing.append("budget_min")
+    
+    if not profil.budget_max or profil.budget_max <= 0:
+        missing.append("budget_max")
+    
+    if not profil.caution_max or profil.caution_max <= 0:
+        missing.append("caution_max")
+    
+    return missing

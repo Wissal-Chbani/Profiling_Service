@@ -32,3 +32,6 @@
 2025-08-04 01:34:33,170 - routes.recommend - INFO - Profil mis à jour pour user_id: userkk_minimal_002
 2025-08-04 02:27:12,736 - routes.recommend - INFO - Profil mis à jour pour user_id: userkk_minimal_002
 2025-08-04 02:27:32,512 - routes.recommend - INFO - Profil créé pour user_id: userkcck_minimal_002
+2025-08-04 02:34:59,840 - routes.recommend - INFO - Profil mis à jour pour user_id: abc123
+2025-08-04 02:35:07,446 - routes.recommend - INFO - Profil mis à jour pour user_id: userkcck_minimal_002
+2025-08-04 02:35:25,717 - routes.recommend - INFO - Préférences mises à jour pour user_id: abc123
